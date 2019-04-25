@@ -31,7 +31,6 @@ function getClientId(s) {
             payload += data;
             // CONNECT packet is 1, using upper 4 bits (00010000 to 00011111)
             var packet_type_flags_byte =  payload.charCodeAt(0);   //data.charCodeAt(0);
-            //s.log("MQTT packet type+flags = " + packet_type_flags_byte.toString());
             if ( packet_type_flags_byte >= 16 && packet_type_flags_byte < 32 ) {
                 // Calculate remaining length with variable encoding scheme
                 var multiplier = 1;
@@ -48,16 +47,12 @@ function getClientId(s) {
                 var payload_offset = remaining_len_pos + 10; // Skip fixed header
                 var client_id_len_msb = payload.charCodeAt(payload_offset);
                 var client_id_len_lsb = payload.charCodeAt(payload_offset + 1);
-                //s.log("MSB: " + client_id_len_msb + "LSB: " + client_id_len_lsb)
                 if ( client_id_len_lsb.length < 2 ) client_id_len_lsb = "0" + client_id_len_lsb;
-                var client_id_len_int = client_id_len_msb + client_id_len_lsb;
-                //s.log("ID Lenght: " + client_id_len_int)
-                
+                var client_id_len_int = client_id_len_msb + client_id_len_lsb;               
                 client_id_str = payload.substr(payload_offset + 2, client_id_len_int);
                 s.log("ClientId value  = " + client_id_str);
                 
                 // If client authentication then check certificate CN matches ClientId
-                //s.log("SSL Payload: " + s.variables.ssl_client_s_dn)
                 var client_cert_cn = parseCSKVpairs(s.variables.ssl_client_s_dn, "CN");
                 if ( client_cert_cn.length && client_cert_cn != client_id_str ) {
                     s.log("Client certificate common name (" + client_cert_cn + ") does not match client ID");
